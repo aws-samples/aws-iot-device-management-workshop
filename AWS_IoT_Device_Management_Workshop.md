@@ -157,8 +157,8 @@ You can go back at any time to the Outputs section to get these values.
 * You should find at least the directories/files in the home directory of the ec2-user:
 	* bin
 	* CA
+	* job-agent
 	* lambda
-	* root.ca.bundle.pem
 	* templateBody.json
 
 
@@ -283,7 +283,7 @@ Server certificates allow your devices to verify that they're communicating with
 
 A shell script is provided on the EC2 instance to download the CA certificates.
 
-* SSH into your EC2 instance and run the following command:
+* ssh into your EC2 instance and run the following command:
 
 		create-root-ca-bundle.sh
 		
@@ -293,7 +293,7 @@ The CA certificates are stored as **$HOME/root.ca.bundle.pem**
 
 Use API calls to provision a device. A device is provisioned in AWS IoT when it has been created in the device registry, a device certificate has been registered and attached to the device, an IoT policy has been attached to the device.
 
-* SSH into your EC2 instance:
+* ssh into your EC2 instance:
 
 		# putting your thing name into variable makes the next steps easier
 		THING_NAME=my-first-thing

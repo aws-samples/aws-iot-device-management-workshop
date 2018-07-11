@@ -5,8 +5,8 @@
 
 ## Files/Directories for the Workshop
 
-* [AWS_IoT_Device_Management_Workshop.md](AWS_IoT_Device_Management_Workshop.md): Workshop instructions.
-* bin, job-agent, lambda: Directories containing scripts that are copied on to an Amazon EC2 instance
+* [AWS\_IoT\_Device\_Management\_Workshop.md](AWS_IoT_Device_Management_Workshop.md): Workshop instructions.
+* bin, job-agent, lambda: Directories containing scripts that are copied onto an Amazon EC2 instance
 * cfn: Directory for CloudFormation template
 * dm-ws.tar: tar file that is used to bootstrap an EC2 instance
 * mk-dm-ws-tar.sh: Shell script to create dm-ws.tar. In case you change something use this script to create a new tar file
