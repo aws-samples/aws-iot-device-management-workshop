@@ -1,0 +1,356 @@
+{
+  "AWSTemplateFormatVersion" : "2010-09-09",
+
+  "Description" : "AWS CloudFormation template for an IoT Device Management WS. Creates an EC2 instance and bootstraps the instance. AMI: amzn-ami-hvm-2017.09.0.20170930-x86_64-gp2",
+
+  "Parameters" : {
+    "SSHKeyName": {
+      "Description" : "Name of an existing EC2 KeyPair to enable SSH access to the instance",
+      "Type": "AWS::EC2::KeyPair::KeyName",
+      "ConstraintDescription" : "Can contain only ASCII characters.",
+      "AllowedPattern" : ".+"
+    },
+    "InstanceType" : {
+      "Description" : "EC2 instance type",
+      "Type" : "String",
+      "Default" : "t2.micro",
+      "AllowedValues" : [ "t2.micro", "t2.small", "t2.medium", "t2.large" ],
+      "ConstraintDescription" : "Must be a valid EC2 instance type"
+    }
+  },
+
+  "Mappings" : {
+      "AWSRegion2AMI" : {
+        "us-east-1"      : { "AMI" : "ami-8c1be5f6" },
+        "us-west-2"      : { "AMI" : "ami-e689729e" },
+        "eu-central-1"   : { "AMI" : "ami-c7ee5ca8" },
+        "eu-west-1"      : { "AMI" : "ami-acd005d5" },
+        "eu-west-2"      : { "AMI" : "ami-1a7f6d7e" },
+        "ap-southeast-2" : { "AMI" : "ami-8536d6e7" },
+        "ap-northeast-1" : { "AMI" : "ami-2a69be4c" },
+        "ap-south-1"     : { "AMI" : "ami-4fc58420" }
+    }
+  },
+
+  "Resources" : {
+
+    "VPC" : {
+      "Type" : "AWS::EC2::VPC",
+      "Properties" : {
+        "CidrBlock" : "192.168.128.0/24",
+        "EnableDnsSupport" : "true",
+        "EnableDnsHostnames" : "true",
+        "Tags" : [
+          { "Key" : "CFN Stack", "Value" : { "Ref" : "AWS::StackName" } },
+          { "Key" : "Name", "Value" : "VPC Device Management WS 192.168.128.0/24" }
+        ]
+      }
+    },
+
+    "PubSubnet" : {
+      "Type" : "AWS::EC2::Subnet",
+      "Properties" : {
+        "VpcId" : { "Ref" : "VPC" },
+        "AvailabilityZone" : {"Fn::Join": ["", [{"Ref": "AWS::Region"}, "a" ]]},
+        "CidrBlock" : "192.168.128.0/25",
+        "MapPublicIpOnLaunch" : "true",
+        "Tags" : [
+          { "Key" : "CFN Stack", "Value" : { "Ref" : "AWS::StackName" } },
+          { "Key" : "Name", "Value" : "Public Subnet Device Management WS 192.168.128.0/25" }
+        ]
+      }
+    },
+
+    "InternetGateway" : {
+      "Type" : "AWS::EC2::InternetGateway",
+      "Properties" : {
+        "Tags" : [
+          { "Key" : "CFN Stack", "Value" : { "Ref" : "AWS::StackName" } },
+          { "Key" : "Name", "Value" : "Inet GW" }
+        ]
+      }
+    },
+
+    "GatewayToInternet" : {
+       "Type" : "AWS::EC2::VPCGatewayAttachment",
+       "Properties" : {
+         "VpcId" : { "Ref" : "VPC" },
+         "InternetGatewayId" : { "Ref" : "InternetGateway" }
+       }
+    },
+
+    "PublicRouteTable" : {
+      "Type" : "AWS::EC2::RouteTable",
+      "DependsOn": "GatewayToInternet",
+      "Properties" : {
+        "VpcId" : { "Ref" : "VPC" },
+        "Tags" : [
+          { "Key" : "CFN Stack", "Value" : { "Ref" : "AWS::StackName" } },
+          { "Key" : "Name", "Value" : "PublicRouteTable" }
+        ]
+      }
+    },
+
+    "PublicRoute" : {
+      "Type" : "AWS::EC2::Route",
+      "Properties" : {
+        "RouteTableId" : { "Ref" : "PublicRouteTable" },
+        "DestinationCidrBlock" : "0.0.0.0/0",
+        "GatewayId" : { "Ref" : "InternetGateway" }
+      }
+    },
+
+    "PubSubnetRTAssoc" : {
+      "Type" : "AWS::EC2::SubnetRouteTableAssociation",
+      "Properties" : {
+        "SubnetId" : { "Ref" : "PubSubnet" },
+        "RouteTableId" : { "Ref" : "PublicRouteTable" }
+      }
+    },
+
+    "DMWSS3Bucket" : {
+      "Type" : "AWS::S3::Bucket"
+    },
+
+    "DMWSIoTPolicy": {
+         "Type": "AWS::IoT::Policy",
+         "Properties": {
+            "PolicyDocument": {
+              "Version": "2012-10-17",
+              "Statement": [
+                  {
+                      "Effect": "Allow",
+                      "Action": [
+                          "iot:*"
+                      ],
+                      "Resource": [
+                          "*"
+                      ]
+                  }
+              ]
+            }
+         }
+      },
+
+      "DMWSRegLambdaJITRRole": {
+         "Type": "AWS::IAM::Role",
+         "Properties": {
+            "AssumeRolePolicyDocument": {
+               "Statement": [ {
+                  "Effect": "Allow",
+                  "Principal": {
+                     "Service": [ "lambda.amazonaws.com" ]
+                  },
+                  "Action": [ "sts:AssumeRole" ]
+               } ]
+            },
+            "Policies": [ {
+               "PolicyName": {"Fn::Join": ["", ["DMWSRegLambdaJITRPolicy-", {"Ref": "AWS::Region"} ]]},
+               "PolicyDocument": {
+                   "Version":"2012-10-17",
+                   "Statement":[
+                      {
+                         "Effect":"Allow",
+                         "Action":[
+                            "logs:CreateLogGroup",
+                            "logs:CreateLogStream",
+                            "logs:PutLogEvents"
+                         ],
+                         "Resource":"arn:aws:logs:*:*:*"
+                      },
+                      {
+                         "Effect":"Allow",
+                         "Action":[
+                            "iot:CreateThing",
+                            "iot:UpdateCertificate",
+                            "iot:CreatePolicy",
+                            "iot:AttachPolicy",
+                            "iot:DescribeCertificate",
+                            "iot:AttachThingPrincipal"
+                         ],
+                         "Resource":"*"
+                      }
+                   ]
+                }
+               }
+             ],
+            "Path": "/"
+          }
+      },
+
+    "DMWSIoTServiceRole": {
+       "Type": "AWS::IAM::Role",
+       "Properties": {
+          "AssumeRolePolicyDocument": {
+             "Statement": [ {
+                "Effect": "Allow",
+                "Principal": {
+                   "Service": [ "iot.amazonaws.com" ]
+                },
+                "Action": [ "sts:AssumeRole" ]
+             } ]
+          },
+          "ManagedPolicyArns": [
+            "arn:aws:iam::aws:policy/service-role/AWSIoTThingsRegistration",
+            "arn:aws:iam::aws:policy/service-role/AWSIoTLogging",
+            "arn:aws:iam::aws:policy/AmazonS3ReadOnlyAccess"
+          ],
+          "Path": "/"
+        }
+    },
+
+    "DMWSEC2Role": {
+       "Type": "AWS::IAM::Role",
+       "Properties": {
+          "AssumeRolePolicyDocument": {
+             "Statement": [ {
+                "Effect": "Allow",
+                "Principal": {
+                   "Service": [ "ec2.amazonaws.com" ]
+                },
+                "Action": [ "sts:AssumeRole" ]
+             } ]
+          },
+          "Path": "/"
+        }
+    },
+
+    "DMWSEC2Policy" : {
+      "Type" : "AWS::IAM::Policy",
+      "Properties" : {
+          "PolicyName" : {"Fn::Join": ["", ["DMWSEC2Policy-", {"Ref": "AWS::Region"} ]]},
+          "PolicyDocument" : {
+              "Statement" : [ {
+                  "Effect" : "Allow",
+                  "Action" : [
+                      "iot:*",
+                      "s3:*",
+                      "iam:PassRole",
+                      "lambda:CreateFunction",
+                      "lambda:GetFunction",
+                      "lambda:ListFunctions",
+                      "lambda:DeleteFunction",
+                      "lambda:AddPermission",
+                      "lambda:GetPolicy",
+                      "logs:FilterLogEvents",
+                      "dynamodb:PutItem",
+                      "dynamodb:GetItem",
+                      "dynamodb:Scan"
+                  ],
+                  "Resource" : "*"
+              }]
+          },
+          "Roles" : [ { "Ref" : "DMWSEC2Role" } ]
+      }
+    },
+
+    "DMWSInstanceProfile": {
+       "Type": "AWS::IAM::InstanceProfile",
+       "Properties": {
+          "Path": "/",
+          "Roles": [ {
+             "Ref": "DMWSEC2Role"
+          } ]
+       }
+    },
+
+    "DMWSSecurityGroup" : {
+      "Type" : "AWS::EC2::SecurityGroup",
+      "Properties" : {
+        "VpcId" : { "Ref" : "VPC" },
+        "GroupDescription" : "Enable access to port 22",
+        "Tags" : [ { "Key" : "Name", "Value" : "Prov WS Security Group" } ],
+        "SecurityGroupIngress" : [
+          {"IpProtocol" : "tcp", "FromPort" : "22", "ToPort" : "22", "CidrIp" : "0.0.0.0/0"}
+        ]
+      }
+    },
+
+    "DMWSEC2Instance": {
+      "Type": "AWS::EC2::Instance",
+      "Properties": {
+        "InstanceType"   : { "Ref" : "InstanceType" },
+        "ImageId"        : { "Fn::FindInMap" : [ "AWSRegion2AMI", { "Ref" : "AWS::Region" }, "AMI" ]},
+        "KeyName"        : { "Ref" : "SSHKeyName" },
+        "SubnetId"       : { "Ref" : "PubSubnet" },
+        "IamInstanceProfile" : { "Ref" : "DMWSInstanceProfile" },
+        "SecurityGroupIds" : [ {"Ref" : "DMWSSecurityGroup"} ],
+        "Tags"           : [ { "Key" : "Name", "Value" : "Device Management WS" } ],
+        "UserData"       : { "Fn::Base64" : { "Fn::Join" : ["", [
+          "#!/bin/bash -v\n",
+          "echo LANG=en_US.utf-8 >> /etc/environment\n",
+          "echo LC_ALL=en_US.UTF-8 >> /etc/environment\n",
+          "\n",
+          "if ! uname -r |grep amzn ; then\n",
+          "    exit 1\n",
+          "fi\n",
+          "\n",
+          "wget YOUR_STATIC_S3_WEBSITE/dm-ws.tar\n",
+          "\n",
+          "tar xf dm-ws.tar -C /home/ec2-user/\n",
+          "wget http://download.opensuse.org/repositories/home:/oojah:/mqtt/CentOS_CentOS-7/home:oojah:mqtt.repo -O /etc/yum.repos.d/mqtt.repo\n",
+          "\n",
+          "sleep 10\n",
+          "\n",
+          "PATH=$PATH:/usr/local/bin\n",
+          "pip install --upgrade pip\n",
+          "hash -r\n",
+          "pip install AWSIoTPythonSDK\n",
+          "pip install urllib3\n",
+          "pip install --upgrade awscli\n",
+          "pip install geopy\n",
+          "pip install boto3\n",
+          "pip install pyOpenSSL\n",
+          "S3_BUCKET=", { "Ref" : "DMWSS3Bucket" }, "\n",
+          "echo \"export S3_BUCKET=$S3_BUCKET\" >> /home/ec2-user/.bash_profile\n",
+          "echo \"complete -C '/usr/local/bin/aws_completer' aws\" >> /home/ec2-user/.bash_profile\n",
+          "REGION=", { "Ref" : "AWS::Region" }, "\n",
+          "mkdir /home/ec2-user/CA\n",
+          "mkdir /home/ec2-user/.aws\n",
+          "echo '[default]' > /home/ec2-user/.aws/config\n",
+          "echo 'output = json' >> /home/ec2-user/.aws/config\n",
+          "echo \"region = $REGION\" >> /home/ec2-user/.aws/config\n",
+          "chmod 400 /home/ec2-user/.aws/config\n",
+          "rm -f /tmp/*\n",
+          "yum -y install telnet jq strace git tree\n",
+          "yum -y install mosquitto-clients\n",
+          "ARN_LAMBDA_ROLE=", { "Fn::GetAtt" : ["DMWSRegLambdaJITRRole", "Arn"] }, "\n",
+          "ARN_IOT_PROVISIONING_ROLE=", { "Fn::GetAtt" : ["DMWSIoTServiceRole", "Arn"] }, "\n",
+          "IOT_ENDPOINT=$(aws iot describe-endpoint --region $REGION | jq -r '.endpointAddress')\n",
+          "IOT_POLICY=", { "Ref": "DMWSIoTPolicy" }, "\n",
+          "echo \"export IOT_ENDPOINT=$IOT_ENDPOINT\" >> /home/ec2-user/.bash_profile\n",
+          "echo \"export IOT_POLICY=$IOT_POLICY\" >> /home/ec2-user/.bash_profile\n",
+          "echo \"export AWS_REGION=$REGION\" >> /home/ec2-user/.bash_profile\n",
+          "echo \"export ARN_LAMBDA_ROLE=$ARN_LAMBDA_ROLE\" >> /home/ec2-user/.bash_profile\n",
+          "echo \"export ARN_IOT_PROVISIONING_ROLE=$ARN_IOT_PROVISIONING_ROLE\" >> /home/ec2-user/.bash_profile\n",
+          "chown -R ec2-user:ec2-user /home/ec2-user/\n",
+          "\n",
+          "exit 0\n"
+          ]]}}
+      }
+    }
+  },
+
+  "Outputs" : {
+    "SSHLogin" : {
+      "Description" : "SSH login string",
+      "Value" : { "Fn::Join" : ["", ["ssh -i ", { "Ref" : "SSHKeyName" }, " ec2-user@", { "Fn::GetAtt" : [ "DMWSEC2Instance", "PublicDnsName" ]}]] }
+    },
+    "S3Bucket" : {
+      "Description" : "Name of the S3 Bucket for the Device Management workshop",
+      "Value" : { "Ref" : "DMWSS3Bucket" }
+    },
+    "IoTPolicy" : {
+      "Description" : "Name of the IoT policy for JITP",
+      "Value" : { "Ref": "DMWSIoTPolicy" }
+    },
+    "ArnIoTProvRole" : {
+      "Description" : "Role Arn for IoT device provisiong",
+      "Value" : { "Fn::GetAtt" : ["DMWSIoTServiceRole", "Arn"] }
+    },
+    "ArnLambdaRole" : {
+      "Description" : "Role Arn for the JITR Lambda function",
+      "Value" : { "Fn::GetAtt" : ["DMWSRegLambdaJITRRole", "Arn"] }
+    }
+  }
+}

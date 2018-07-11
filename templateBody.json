@@ -1,0 +1,41 @@
+{
+  "Parameters" : {
+     "ThingName" : {
+       "Type" : "String"
+     },
+     "SerialNumber" : {
+       "Type" : "String"
+     },
+     "Location" : {
+        "Type" : "String",
+        "Default" : "WA"
+     },
+     "CSR" : {
+       "Type" : "String"
+     }
+  },
+  "Resources" : {
+    "thing" : {
+      "Type" : "AWS::IoT::Thing",
+      "Properties" : {
+        "ThingName" : {"Ref" : "ThingName"},
+        "AttributePayload" : { "version" : "v1", "serialNumber" :  {"Ref" : "SerialNumber"}},
+        "ThingTypeName" :  "bulk-type",
+        "ThingGroups" : ["bulk-group"]
+      }
+    },
+    "certificate" : {
+      "Type" : "AWS::IoT::Certificate",
+      "Properties" : {
+        "CertificateSigningRequest": {"Ref" : "CSR"},
+        "Status" : "ACTIVE"
+      }
+    },
+    "policy" : {
+      "Type" : "AWS::IoT::Policy",
+      "Properties" : {
+        "PolicyDocument": "{\"Version\": \"2012-10-17\",\"Statement\": [{\"Effect\": \"Allow\",\"Action\": [\"iot:*\"],\"Resource\": [\"*\"]}]}"
+      }
+    }
+  }
+}
