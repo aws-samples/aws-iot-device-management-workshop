@@ -701,7 +701,7 @@ When you connect to AWS IoT with the device certificate for the first time, the 
 
 This MQTT registration event will trigger an AWS Lambda function through an [IoT topic rule](https://docs.aws.amazon.com/iot/latest/developerguide/iot-rules.html). The Lambda function will complete the provisioning of the device. After these steps, your device will be ready to work with AWS IoT.
 
-**In this exercise** you will setup JITR with your own CA and an AWS Lambda function. When creating the device the lambda function will use the certificate id as thing-name and policy-name.
+**In this exercise** you will setup JITR with your own CA and an AWS Lambda function. When creating the device the lambda function will generate a thing name which starts with *jitr-* followed by the certificate id. The thing name will look similar to *jitr-12345435e8912702c16da3b3f8b91d085f7c0028d91ae7be53a1e7aa8160b3db*
 
 * You should still have stored the certificate id in the shell variable *$CA_CERTIFICATE_ID*. **If not** store the certificate id into that variable
 
@@ -819,10 +819,11 @@ This MQTT registration event will trigger an AWS Lambda function through an [IoT
 	
 * To verify if JITR was successful you should:
 	* Have a look in the device registry (hint: aws iot list-things)
-	* Look at the CloudWatch logs for the lambda and AWS IoT: AWS CloudWatch Console -> Logs‰
+	* Look at the CloudWatch logs for the lambda and AWS IoT: **AWS CloudWatch Console -> Logs -> /aws/lambda/jitr**
 
-[[Top](#Top)]
+
 <a id="IoT_Jobs"></a>
+[[Top](#Top)]
 ## IoT Jobs
 [AWS IoT Jobs](https://docs.aws.amazon.com/iot/latest/developerguide/iot-jobs.html) is a service that allows you to define a set of remote operations that are sent to and executed on one or more devices connected to AWS IoT. 
 
@@ -841,7 +842,7 @@ You will find the job agent as *~/job-agent/job-agent.py*
 
 * **Provision a device** with one of the options that you have learned in the **previous exercises** and put the root.ca.bundle.crt, device key and device cert into the directory *~/job-agent/*. E.g:
 
-
+		cd ~/job-agent/
 		THING_NAME=job-agent
 		aws iot create-thing --thing-name $THING_NAME
 		aws iot create-keys-and-certificate --set-as-active \
@@ -875,13 +876,13 @@ Go to the AWS IoT Console
 
 1. Test
 2. Subscribe to a topic
-3. Subscription topic: $aws/events/#
+3. Subscription topic: **$aws/events/#**
 4. Subscribe
 5. Subscribe to a topic
-6. Subscription topic: $aws/things/#
+6. Subscription topic: **$aws/things/#**
 7. Subscribe
 8. Subscribe to a topic
-9. Subscription topic: sys/info
+9. Subscription topic: **sys/info**
 10. Subscribe
 
 
@@ -899,6 +900,7 @@ The intention of the job document is to instruct the job agent to get the uptime
 * ssh into the EC2 instance in an additional session. The job agent running in another session should not be interrupted.
 * Copy the job document to your S3 Bucket
 
+		cd ~/job-agent/
 		# copy the document
 		aws s3 cp job-document.json s3://$S3_BUCKET/
 		
@@ -962,6 +964,8 @@ We will simulate temperature sensors by adding reported temperatures to the devi
 		# if you have named the devices in the bulk provisioning section
 		# differently, choose the appropriate basename
 		fleet-indexing.py -b bulky
+		
+	If you get an **error message** containing *Creation of index AWS_Things is in progress* it means that the indexing process has not finished yet. Wait some minutes and try again.
 		
 * Verify that the modification was successful. Every device from the bulk provisioning exercise should have an attribute *room\_number* and a reported temperature in the *shadow*
 
@@ -1058,8 +1062,8 @@ Create a thing group policy, attach the policy to the thing group, create a devi
 		aws iot list-things-in-thing-group \
 		  --thing-group-name $THING_GROUP_NAME
 		
-* Subscribe in the AWS IoT console to *telemetry/building/one/#*
-* Publish a message to the topic *telemetry/building/one/$THING_NAME*. This message should arrive.
+* Subscribe in the AWS IoT console to **telemetry/building/one/#**
+* Publish a message to the topic *telemetry/building/one/$THING_NAME*. You should see that the message is arriving.
 
 		mosquitto_pub --cafile ~/root.ca.bundle.pem \
 		  --cert $THING_NAME.certificate.pem \
@@ -1185,7 +1189,7 @@ Deleting the resources that where created during the workshop is a semi-automate
 
 **IF YOU HAVE ANY DEVICES CREATED OUTSIDE OF THIS WORKSHOP WHO'S NAMES START WITH "bulky" or "jitr-" they will be also deleted. In case of doubt delete the resources manually!**
 
-		clean-up.py
+	clean-up.py
 
 * Delete the remaining resources manually
 
@@ -1229,7 +1233,7 @@ Deleting the resources that where created during the workshop is a semi-automate
 		
 * Go to the AWS CloudFormation console
 
-		Delete the provisioning workshop stack
+		Delete the stack IoTDeviceManagementWS
 
 
 
