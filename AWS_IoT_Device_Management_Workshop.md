@@ -172,24 +172,24 @@ To enable [AWS IoT logging](https://docs.aws.amazon.com/iot/latest/developerguid
 
 Go to the AWS IAM console
 
-        1. Roles
-        2. Create role
-        3. AWS service 
-        4. IoT
-        5. Next: Permissions
-        6. At least the following managed policy should already be chosen: AWSIoTLogging
-        7. Next: Review
-        4. Role name: AWSIoTAccessServices
-        5. Create Role
+1. Roles
+2. Create role
+3. AWS service 
+4. IoT
+5. Next: Permissions
+6. At least the following managed policy should already be chosen: AWSIoTLogging
+7. Next: Review
+4. Role name: AWSIoTAccessServices
+5. Create Role
 
 Go to the AWS IoT console
 
-        1. Get started (only if no resources are provisioned)
-        2. Settings
-        3. Logs (if DISABLED) -> Edit
-        4. Change "Level of verbosity" to "Warnings"
-        5. Set role -> Select "AWSIoTAccessServices"
-        6. Update
+1. Get started (only if no resources are provisioned)
+2. Settings
+3. Logs (if DISABLED) -> Edit
+4. Change "Level of verbosity" to "Warnings"
+5. Set role -> Select "AWSIoTAccessServices"
+6. Update
 
 
 The log files from AWS IoT are send to **Amazon CloudWatch**. The AWS console can be used to look at these logs.
