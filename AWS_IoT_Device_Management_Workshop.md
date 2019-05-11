@@ -423,7 +423,7 @@ The device that will be created will also be put into a thing group and a thing 
 
 		1. Manage
 		2. Things
-		3. Click on you thing
+		3. Click on your thing
 		4. Security
 		5. Click the certificate
 		6. Policies
