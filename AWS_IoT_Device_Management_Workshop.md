@@ -778,7 +778,7 @@ This MQTT registration event will trigger an AWS Lambda function through an [IoT
 		
 * Add a permission to the lambda to allow the AWS IoT to invoke the function. For adding the permissions we need the topic rule arn and will store it into a shell variable
 				
-		# get you AWS account id
+		# get your AWS account id
 		ACCOUNT_ID=$(aws sts get-caller-identity | jq -r '.Account')
 		
 		# verify that the variable has been set
