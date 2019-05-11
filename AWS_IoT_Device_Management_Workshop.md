@@ -155,7 +155,7 @@ You can go back at any time to the Outputs section to get these values.
 	* you can find the hostname in the outputs section of the CloudFormation console
 	* if you run into a permissions error, make sure to change the permissions on your SSH key to not be publicly viewable in order for SSH to work. Use this command if needed:
 	
-		```chmod 400 YOUR-KEY-PAIR-NAME.pem```
+		`chmod 400 <key-pair>.pem`
 
 * You should find at least the directories/files in the home directory of the ec2-user:
 	* bin
