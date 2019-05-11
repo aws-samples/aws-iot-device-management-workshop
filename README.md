@@ -1,6 +1,6 @@
 ## AWS IoT Device Management Workshop
 
-[AWS IoT Device Management](https://aws.amazon.com/iot-device-management/) makes it easy to securely onboard, organize, monitor, and remotely manage IoT devices at scale. With this workshop your will learn hands-on the features from AWS IoT Device Management like several onboarding options, jobs, fleet indexing, thing groups and fine grained logging.
+[AWS IoT Device Management](https://aws.amazon.com/iot-device-management/) makes it easy to securely onboard, organize, monitor, and remotely manage IoT devices at scale. With this workshop you will learn hands-on the features from AWS IoT Device Management like several onboarding options, jobs, fleet indexing, thing groups and fine grained logging.
 
 
 ## Files/Directories for the Workshop
