@@ -451,7 +451,7 @@ The device that will be created will also be put into a thing group and a thing 
 ## Bulk Device Provisioning
 **In this exercise** you will bulk provision multiple things with one API call: [*start-thing-registration-task*](https://docs.aws.amazon.com/iot/latest/developerguide/bulk-provisioning.html)
 
-The API call **start-thing-registration-task** can be used to provision things in bulk. To provision things in bulk you need the same parameters as with single device provisioning with the **register-thing** API call. But you will put multiple parameters into file which then must be stored in an Amazon S3 bucket. 
+The API call **start-thing-registration-task** can be used to provision things in bulk. To provision things in bulk you need the same parameters as with single device provisioning with the **register-thing** API call. But you will put multiple parameters into the file which then must be stored in an Amazon S3 bucket. 
 
 An IAM role is also required to allow AWS IoT to access the S3 bucket and provision devices in your account. The role was created already through CloudFormation. You can find the required role ARN in the outputs section of the CloudFormation stack.
 
