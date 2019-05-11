@@ -311,7 +311,7 @@ You should see a message that was posted to
 
 * Go to your EC2 instance:
 		
-		# create key and certificate for your device and active the device
+		# create key and certificate for your device and activate the device
 		aws iot create-keys-and-certificate --set-as-active \
 		  --public-key-outfile $THING_NAME.public.key \
 		  --private-key-outfile $THING_NAME.private.key \
