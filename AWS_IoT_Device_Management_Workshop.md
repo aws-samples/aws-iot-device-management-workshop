@@ -359,7 +359,7 @@ You should see a message that was posted to
 	
 		$aws/events/thing/$THING_NAME/updated
 		
-### Publish a message with you newly created device
+### Publish a message with your newly created device
 After your device has been provisioned you will publish a message to AWS IoT. To publish a message the command *mosquitto_pub* is used. This command requires the iot endpoint to talk to.
 
 
