@@ -716,7 +716,7 @@ This MQTT registration event will trigger an AWS Lambda function through an [IoT
 		  --remove-auto-registration \
 		  --new-auto-registration-status DISABLE
 
-* Verify that the provision template an role arn have been removed from the CA
+* Verify that the provision template and role arn have been removed from the CA
 
 		aws iot describe-ca-certificate --certificate-id $CA_CERTIFICATE_ID
     
