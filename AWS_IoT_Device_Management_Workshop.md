@@ -195,7 +195,7 @@ Go to the AWS IoT console
 6. Update
 
 
-The log files from AWS IoT are send to **Amazon CloudWatch**. The AWS console can be used to look at these logs.
+The log files from AWS IoT are sent to **Amazon CloudWatch**. The AWS console can be used to look at these logs.
 
 
 <a id="Registry_Events"></a>
