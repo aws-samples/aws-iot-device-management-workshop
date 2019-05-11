@@ -808,7 +808,7 @@ This MQTT registration event will trigger an AWS Lambda function through an [IoT
 
 	Name for your device cert
 	
-		deviceCert=deviceJITPCert
+		deviceCert=deviceJITRCert
 
 	Create a thing key, certificate and connect to AWS IoT like you did in the JITP section of this workshop.
 
