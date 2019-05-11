@@ -42,7 +42,7 @@ To conduct the workshop you will need the following tools/setup/knowledge:
 		* Manual connect (ssh) to an EC2 instance from Windows with Putty: <http://docs.aws.amazon.com/AWSEC2/latest/UserGuide/putty.html>
 * A ssh key-pair to be able to log into the EC2 instance
 	* a ssh key-pair can be generated or imported in the AWS console under *EC2 -> Key Pairs*
-* Basic knowledge howto move around on a linux system and edit files
+* Basic knowledge how to move around on a linux system and edit files
 
 ### Recommendation
 Don't use a production account to conduct this workshop to not mess up things accidentally. Use an AWS region where you do not have provisioned any IoT resources to avoid conflicts during creating or deleting resources.
