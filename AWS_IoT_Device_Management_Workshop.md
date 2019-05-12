@@ -974,7 +974,7 @@ We will simulate temperature sensors by adding reported temperatures to the devi
 
 		aws iot search-index --query-string "thingName:bulky*"
 
-* Find all device in the registry which have a room number and where the temperature is greater than 20°
+* Find all devices in the registry which have a room number and where the temperature is greater than 20°
 		
 		aws iot search-index \
 		--query-string "shadow.reported.temperature>20 AND attributes.room_number:*"
