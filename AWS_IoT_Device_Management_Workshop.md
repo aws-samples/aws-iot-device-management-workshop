@@ -156,6 +156,7 @@ You can go back at any time to the Outputs section to get these values.
 	* if you run into a permissions error, make sure to change the permissions on your SSH key to not be publicly viewable in order for SSH to work. Use this command if needed:
 	
 		`chmod 400 <key-pair>.pem`
+		
 
 * You should find at least the directories/files in the home directory of the ec2-user:
 	* bin
@@ -1097,6 +1098,11 @@ Create a thing group policy, attach the policy to the thing group, create a devi
 * Get the current logging configuration
 	
 		aws iot get-v2-logging-options 
+		
+	*If you run into an error when calling this command saying "SetV2LoggingOptions was not previously called. No logging options have been set.", try running the following command:
+		
+		aws iot set-v2-logging-options --role-arn <ARN-of-IAM-role> --default-log-level WARN
+		
 
 * Set the logging level to DEBUG for the thing group
 
