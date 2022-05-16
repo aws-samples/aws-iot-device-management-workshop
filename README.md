@@ -1,4 +1,5 @@
 ## Updated version
+
 Please note: This is an older version of the AWS IoT Device Management workshop.
 
 You can find an updated version at [https://iot-device-management.workshop.aws/en/](https://iot-device-management.workshop.aws/en/).
