@@ -1,6 +1,11 @@
 ![AWS_IoT_Core.png](img/AWS_IoT_Core.png)
 
 <a id="Top"></a>
+## Updated version
+Please note: This is an older version of the AWS IoT Device Management workshop.
+
+You can find an updated version at [https://iot-device-management.workshop.aws/en/](https://iot-device-management.workshop.aws/en/).
+
 ## AWS IoT Device Management Workshop
 This workshop will guide you through the features of [AWS IoT Device Management](https://aws.amazon.com/iot-device-management/).
 
@@ -148,6 +153,10 @@ In the **Outputs** section for your stack in the CloudFormation console you find
 * ARN of a role that is used for device provisioning
 * SSH login information
 * ARN of a role required for a Lambda function
+
+Please note: for the ease of use in this workshop an open IoT policy is used. Don't 
+use such an IoT policy in production environments. Always create your IoT policies
+according the the least privilege principle.
 
 You can go back at any time to the Outputs section to get these values.
 
