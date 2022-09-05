@@ -48,7 +48,7 @@ To conduct the workshop you will need the following tools/setup/knowledge:
 		* Manual connect (ssh) to an EC2 instance from Windows with Putty: <http://docs.aws.amazon.com/AWSEC2/latest/UserGuide/putty.html>
 * A ssh key-pair to be able to log into the EC2 instance
 	* a ssh key-pair can be generated or imported in the AWS console under *EC2 -> Key Pairs*
-* Basic knowledge howto move around on a linux system and edit files
+* Basic knowledge how to move around on a linux system and edit files
 
 ### Recommendation
 Don't use a production account to conduct this workshop to not mess up things accidentally. Use an AWS region where you do not have provisioned any IoT resources to avoid conflicts during creating or deleting resources.
@@ -163,6 +163,10 @@ You can go back at any time to the Outputs section to get these values.
 
 * ssh into your instance
 	* you can find the hostname in the outputs section of the CloudFormation console
+	* if you run into a permissions error, make sure to change the permissions on your SSH key to not be publicly viewable in order for SSH to work. Use this command if needed:
+	
+		`chmod 400 <key-pair>.pem`
+		
 
 * You should find at least the directories/files in the home directory of the ec2-user:
 	* bin
@@ -202,7 +206,7 @@ Go to the AWS IoT console
 6. Update
 
 
-The log files from AWS IoT are send to **Amazon CloudWatch**. The AWS console can be used to look at these logs.
+The log files from AWS IoT are sent to **Amazon CloudWatch**. The AWS console can be used to look at these logs.
 
 
 <a id="Registry_Events"></a>
@@ -318,7 +322,7 @@ You should see a message that was posted to
 
 * Go to your EC2 instance:
 		
-		# create key and certificate for your device and active the device
+		# create key and certificate for your device and activate the device
 		aws iot create-keys-and-certificate --set-as-active \
 		  --public-key-outfile $THING_NAME.public.key \
 		  --private-key-outfile $THING_NAME.private.key \
@@ -366,7 +370,7 @@ You should see a message that was posted to
 	
 		$aws/events/thing/$THING_NAME/updated
 		
-### Publish a message with you newly created device
+### Publish a message with your newly created device
 After your device has been provisioned you will publish a message to AWS IoT. To publish a message the command *mosquitto_pub* is used. This command requires the iot endpoint to talk to.
 
 
@@ -430,7 +434,7 @@ The device that will be created will also be put into a thing group and a thing 
 
 		1. Manage
 		2. Things
-		3. Click on you thing
+		3. Click on your thing
 		4. Security
 		5. Click the certificate
 		6. Policies
@@ -458,7 +462,7 @@ The device that will be created will also be put into a thing group and a thing 
 ## Bulk Device Provisioning
 **In this exercise** you will bulk provision multiple things with one API call: [*start-thing-registration-task*](https://docs.aws.amazon.com/iot/latest/developerguide/bulk-provisioning.html)
 
-The API call **start-thing-registration-task** can be used to provision things in bulk. To provision things in bulk you need the same parameters as with single device provisioning with the **register-thing** API call. But you will put multiple parameters into file which then must be stored in an Amazon S3 bucket. 
+The API call **start-thing-registration-task** can be used to provision things in bulk. To provision things in bulk you need the same parameters as with single device provisioning with the **register-thing** API call. But you will put multiple parameters into the file which then must be stored in an Amazon S3 bucket. 
 
 An IAM role is also required to allow AWS IoT to access the S3 bucket and provision devices in your account. The role was created already through CloudFormation. You can find the required role ARN in the outputs section of the CloudFormation stack.
 
@@ -723,7 +727,7 @@ This MQTT registration event will trigger an AWS Lambda function through an [IoT
 		  --remove-auto-registration \
 		  --new-auto-registration-status DISABLE
 
-* Verify that the provision template an role arn have been removed from the CA
+* Verify that the provision template and role arn have been removed from the CA
 
 		aws iot describe-ca-certificate --certificate-id $CA_CERTIFICATE_ID
     
@@ -785,7 +789,7 @@ This MQTT registration event will trigger an AWS Lambda function through an [IoT
 		
 * Add a permission to the lambda to allow the AWS IoT to invoke the function. For adding the permissions we need the topic rule arn and will store it into a shell variable
 				
-		# get you AWS account id
+		# get your AWS account id
 		ACCOUNT_ID=$(aws sts get-caller-identity | jq -r '.Account')
 		
 		# verify that the variable has been set
@@ -981,7 +985,7 @@ We will simulate temperature sensors by adding reported temperatures to the devi
 
 		aws iot search-index --query-string "thingName:bulky*"
 
-* Find all device in the registry which have a room number and where the temperature is greater than 20°
+* Find all devices in the registry which have a room number and where the temperature is greater than 20°
 		
 		aws iot search-index \
 		--query-string "shadow.reported.temperature>20 AND attributes.room_number:*"
@@ -1104,6 +1108,11 @@ Create a thing group policy, attach the policy to the thing group, create a devi
 * Get the current logging configuration
 	
 		aws iot get-v2-logging-options 
+		
+	*If you run into an error when calling this command saying "SetV2LoggingOptions was not previously called. No logging options have been set.", try running the following command:
+		
+		aws iot set-v2-logging-options --role-arn <ARN-of-IAM-role> --default-log-level WARN
+		
 
 * Set the logging level to DEBUG for the thing group
 
