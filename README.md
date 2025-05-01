@@ -1,8 +1,28 @@
-## Updated version
+# Repository Archived - Please Note
 
-Please note: This is an older version of the AWS IoT Device Management workshop.
+This repository has been archived and is now in read-only mode. The reason for this archival is that the content is currently being updated in a new workshop.
 
-You can find an updated version at [https://iot-device-management.workshop.aws/en/](https://iot-device-management.workshop.aws/en/).
+## Important Information:
+
+1. **New Workshop Location**: The updated version of this workshop can be found at: https://iot-device-management.workshop.aws/en/
+
+2. **Read-Only Status**: As this repository is archived:
+   - No new issues or pull requests can be opened
+   - Existing issues and pull requests are now read-only
+   - The code, wiki, and all other repository content are read-only
+   - No new collaborators or teams can be added
+   - The repository can still be forked and starred
+
+3. **Limited Functionality**: 
+   - You cannot make any changes to this repository
+   - Commits, branches, tags, and releases are all read-only
+   - Comments and reactions on issues, pull requests, and commits are disabled
+
+4. **Searchability**: This repository will still appear in search results and can be referenced
+
+We encourage you to visit the new workshop link for the most up-to-date content and interactive experience. Thank you for your understanding and continued interest in AWS IoT Device Management.
+
+----
 
 ## AWS IoT Device Management Workshop
 
